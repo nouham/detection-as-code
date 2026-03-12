@@ -1,0 +1,22 @@
+[
+  {
+    "_comment": "TRUE POSITIVE: net.exe used to create a local user account",
+    "test_id": "T1136.001-TP-001",
+    "expected_result": "ALERT",
+    "EventID": 4720,
+    "SubjectUserName": "nouha",
+    "SubjectLogonId": "0x1e2b5",
+    "TargetUserName": "AtomicTestUser",
+    "TargetDomainName": "WINDOWS11"
+  },
+  {
+    "_comment": "TRUE POSITIVE: net1.exe (child of net.exe) creating user",
+    "test_id": "T1136.001-TP-002",
+    "expected_result": "ALERT",
+    "EventID": 4720,
+    "SubjectUserName": "nouha",
+    "SubjectLogonId": "0x1e2b5",
+    "TargetUserName": "backdooruser",
+    "TargetDomainName": "WINDOWS11"
+  }
+]

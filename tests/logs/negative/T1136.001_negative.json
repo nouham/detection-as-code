@@ -1,0 +1,22 @@
+[
+  {
+    "_comment": "TRUE NEGATIVE: Computer account creation (ends with $) — filtered by rule",
+    "test_id": "T1136.001-TN-001",
+    "expected_result": "NO_ALERT",
+    "EventID": 4720,
+    "SubjectUserName": "WINDOWS11$",
+    "SubjectLogonId": "0x3e7",
+    "TargetUserName": "DESKTOP-ABC123$",
+    "TargetDomainName": "WORKGROUP"
+  },
+  {
+    "_comment": "TRUE NEGATIVE: Another computer account — name ends with $ so filtered",
+    "test_id": "T1136.001-TN-002",
+    "expected_result": "NO_ALERT",
+    "EventID": 4720,
+    "SubjectUserName": "FILESERVER01$",
+    "SubjectLogonId": "0x3e7",
+    "TargetUserName": "WORKSTATION42$",
+    "TargetDomainName": "WORKGROUP"
+  }
+]

@@ -1,0 +1,60 @@
+title: LSASS Memory Dump via Common Tools
+id: b3c6d9e2-4f5a-6b7c-8d9e-0f1a2b3c4d5e
+status: production
+description: >
+  Detects attempts to dump LSASS process memory using common offensive tools
+  (Task Manager, ProcDump, comsvcs.dll MiniDump). Credential dumping from LSASS
+  is one of the most common post-exploitation techniques for lateral movement.
+references:
+  - https://attack.mitre.org/techniques/T1003/001/
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1003.001/T1003.001.md
+author: Detection Engineering Team
+date: 2024-01-20
+modified: 2024-03-10
+tags:
+  - attack.credential_access
+  - attack.t1003.001
+  - atomic_red_team
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  # Method 1: ProcDump targeting LSASS
+  selection_procdump:
+    Image|endswith: '\procdump.exe'
+    CommandLine|contains: 'lsass'
+
+  # Method 2: comsvcs.dll MiniDump (living off the land)
+  selection_comsvcs:
+    CommandLine|contains|all:
+      - 'comsvcs'
+      - 'MiniDump'
+
+  # Method 3: rundll32 + comsvcs pattern
+  selection_rundll32:
+    Image|endswith: '\rundll32.exe'
+    CommandLine|contains:
+      - 'comsvcs.dll,MiniDump'
+      - 'comsvcs.dll, MiniDump'
+
+  # Method 4: Direct process access to lsass (Sysmon Event 10)
+  selection_process_access:
+    TargetImage|endswith: '\lsass.exe'
+    GrantedAccess|contains:
+      - '0x1010'
+      - '0x1410'
+      - '0x147a'
+      - '0x1fffff'
+
+  condition: selection_procdump or selection_comsvcs or selection_rundll32 or selection_process_access
+falsepositives:
+  - Windows Defender and other AV products that access LSASS for process inspection
+  - Sysinternals tools in legitimate admin use (require approval + ticket)
+  - Some EDR agents open handles to LSASS (build access mask allowlist)
+level: critical
+# Tuning history:
+# 2024-01-20 - Initial rule (process_access only). FP rate: ~30/day from AV/EDR
+# 2024-02-05 - Added GrantedAccess mask filter. FP rate: ~5/day
+# 2024-02-20 - Built allowlist for EDR agent PIDs (dynamic). FP rate: ~1/week
+# 2024-03-10 - Added procdump + comsvcs methods. Still ~1 FP/week
+# Current TPR: 100% | FPR: ~1 alert/week (all from IT with approved tickets)

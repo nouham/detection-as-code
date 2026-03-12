@@ -1,0 +1,126 @@
+version: "3.9"
+
+# =============================================================================
+# Detection-as-Code: Local SIEM Environment
+# =============================================================================
+# Spins up Elasticsearch + Kibana for local rule testing.
+#
+# Usage:
+#   docker compose up -d          (start everything in background)
+#   docker compose logs -f        (watch live logs)
+#   docker compose down           (stop containers, keep data)
+#   docker compose down -v        (stop containers AND delete all data)
+#
+# Access:
+#   Kibana:        http://localhost:5601
+#   Elasticsearch: http://localhost:9200
+#   Username: elastic
+#   Password: changeme
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # Elasticsearch — the log database / search engine
+  # ---------------------------------------------------------------------------
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: detection-es
+    environment:
+      - node.name=detection-es
+      - cluster.name=detection-lab
+      - discovery.type=single-node        # Single node mode — no cluster needed for a lab
+      - ELASTIC_PASSWORD=changeme
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=false   # HTTP (not HTTPS) — fine for a local lab
+      - xpack.license.self_generated.type=trial # Free 30-day trial license (enables all features)
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g       # 1 GB RAM for Elasticsearch — increase if you have more
+      - bootstrap.memory_lock=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - "9200:9200"    # Elasticsearch API — Winlogbeat connects here
+    volumes:
+      - es_data:/usr/share/elasticsearch/data   # Persists log data between restarts
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -u elastic:changeme http://localhost:9200/_cluster/health | grep -q 'status'"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s    # Give ES 60 seconds to start before health checks begin
+    networks:
+      - detection-net
+
+  # ---------------------------------------------------------------------------
+  # Kibana — the visual dashboard / detection rules UI
+  # ---------------------------------------------------------------------------
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.12.0
+    container_name: detection-kibana
+    depends_on:
+      elasticsearch:
+        condition: service_healthy   # Wait until Elasticsearch is ready before starting
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=changeme
+      - XPACK_SECURITY_ENCRYPTIONKEY=thisIsA32CharacterSecureKeyForLab   # Required for saved objects
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=thisIsA32CharacterSecureKeyForLab
+      - XPACK_REPORTING_ENCRYPTIONKEY=thisIsA32CharacterSecureKeyForLab
+    ports:
+      - "5601:5601"    # Kibana UI — open this in your browser
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:5601/api/status | grep -q 'available' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 90s
+    networks:
+      - detection-net
+
+  # ---------------------------------------------------------------------------
+  # Setup container — runs once to configure Kibana system password
+  # This is needed because Kibana uses a separate internal user (kibana_system)
+  # ---------------------------------------------------------------------------
+  setup:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: detection-setup
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    command: >
+      bash -c '
+        echo "Setting kibana_system password...";
+        until curl -s -u elastic:changeme -X POST http://elasticsearch:9200/_security/user/kibana_system/_password \
+          -H "Content-Type: application/json" \
+          -d "{\"password\":\"changeme\"}" | grep -q "^{}"; do
+          sleep 5;
+          echo "Retrying...";
+        done;
+        echo "kibana_system password set successfully!";
+      '
+    networks:
+      - detection-net
+
+# ---------------------------------------------------------------------------
+# Volumes — where data is stored on your machine
+# ---------------------------------------------------------------------------
+volumes:
+  es_data:
+    driver: local
+    # Data is stored in Docker's managed volume directory
+    # On Windows: C:\Users\<you>\AppData\Local\Docker\volumes\
+    # On Mac:     ~/Library/Containers/com.docker.docker/Data/vms/
+    # On Linux:   /var/lib/docker/volumes/
+
+# ---------------------------------------------------------------------------
+# Networks — private network so containers can talk to each other
+# ---------------------------------------------------------------------------
+networks:
+  detection-net:
+    driver: bridge

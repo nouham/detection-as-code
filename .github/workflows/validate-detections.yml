@@ -1,0 +1,346 @@
+name: Detection-as-Code Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'rules/**'
+      - 'tests/**'
+      - 'scripts/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'rules/**'
+      - 'tests/**'
+
+# Prevent concurrent pipeline runs on the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.11"
+  SIGMA_CLI_VERSION: "0.9.1"
+
+jobs:
+  # ============================================================
+  # JOB 1: Lint and schema-validate Sigma YAML rules
+  # ============================================================
+  lint-rules:
+    name: "🔍 Lint Sigma Rules"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install pyyaml jsonschema pySigma sigma-cli
+
+      - name: Validate Sigma YAML syntax
+        run: |
+          python3 - <<'EOF'
+          import yaml, sys, os
+          from pathlib import Path
+
+          REQUIRED_FIELDS = ['title', 'id', 'status', 'description', 'logsource', 'detection', 'level']
+          VALID_LEVELS = {'informational', 'low', 'medium', 'high', 'critical'}
+          VALID_STATUSES = {'stable', 'test', 'experimental', 'production', 'deprecated'}
+
+          errors = []
+          rules_dir = Path("rules/sigma")
+
+          for rule_file in sorted(rules_dir.glob("*.yml")):
+              try:
+                  with open(rule_file) as f:
+                      rule = yaml.safe_load(f)
+              except yaml.YAMLError as e:
+                  errors.append(f"{rule_file.name}: YAML parse error: {e}")
+                  continue
+
+              # Check required fields
+              for field in REQUIRED_FIELDS:
+                  if field not in rule:
+                      errors.append(f"{rule_file.name}: Missing required field '{field}'")
+
+              # Validate level
+              if rule.get('level') not in VALID_LEVELS:
+                  errors.append(f"{rule_file.name}: Invalid level '{rule.get('level')}' — must be one of {VALID_LEVELS}")
+
+              # Validate status
+              if rule.get('status') not in VALID_STATUSES:
+                  errors.append(f"{rule_file.name}: Invalid status '{rule.get('status')}'")
+
+              # Validate detection has condition
+              if 'condition' not in rule.get('detection', {}):
+                  errors.append(f"{rule_file.name}: detection block missing 'condition'")
+
+              # Validate ATT&CK tags exist
+              tags = rule.get('tags', [])
+              has_attack_tag = any(t.startswith('attack.t') for t in tags)
+              if not has_attack_tag:
+                  errors.append(f"{rule_file.name}: Missing ATT&CK technique tag (attack.tXXXX)")
+
+              print(f"  ✓ {rule_file.name}")
+
+          if errors:
+              print("\n❌ LINT FAILURES:")
+              for e in errors:
+                  print(f"  • {e}")
+              sys.exit(1)
+          else:
+              print(f"\n✅ All {len(list(rules_dir.glob('*.yml')))} rules passed linting")
+          EOF
+
+      - name: Check for duplicate rule IDs
+        run: |
+          python3 - <<'EOF'
+          import yaml
+          from pathlib import Path
+          from collections import defaultdict
+
+          ids = defaultdict(list)
+          for rule_file in Path("rules/sigma").glob("*.yml"):
+              with open(rule_file) as f:
+                  rule = yaml.safe_load(f)
+              rule_id = rule.get("id", "")
+              if rule_id:
+                  ids[rule_id].append(rule_file.name)
+
+          duplicates = {k: v for k, v in ids.items() if len(v) > 1}
+          if duplicates:
+              print("❌ Duplicate rule IDs found:")
+              for id_, files in duplicates.items():
+                  print(f"  {id_}: {files}")
+              import sys; sys.exit(1)
+          print("✅ No duplicate rule IDs")
+          EOF
+
+  # ============================================================
+  # JOB 2: Run detection logic tests (TPR/FPR validation)
+  # ============================================================
+  test-detections:
+    name: "🧪 Test Detection Logic"
+    runs-on: ubuntu-latest
+    needs: lint-rules
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install test dependencies
+        run: pip install pyyaml pytest
+
+      - name: Run validation engine
+        run: |
+          python3 scripts/validate_rules.py \
+            --rules rules/sigma \
+            --logs tests/logs \
+            --output test_report.json \
+            --fail-on-fp
+
+      - name: Enforce minimum TPR threshold (>= 95%)
+        run: |
+          python3 - <<'EOF'
+          import json, sys
+
+          with open("test_report.json") as f:
+              report = json.load(f)
+
+          MIN_TPR = 0.95
+          failures = []
+
+          for rule in report["rules"]:
+              tpr = rule.get("tpr", 0)
+              if tpr < MIN_TPR and rule["true_positives"] + rule["false_negatives"] > 0:
+                  failures.append(
+                      f"  [{rule['technique_id']}] {rule['rule_title']}: TPR={tpr:.1%} < {MIN_TPR:.0%}"
+                  )
+
+          if failures:
+              print(f"❌ Rules below TPR threshold ({MIN_TPR:.0%}):")
+              for f in failures:
+                  print(f)
+              sys.exit(1)
+          else:
+              print(f"✅ All rules meet minimum TPR of {MIN_TPR:.0%}")
+          EOF
+
+      - name: Upload test report artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: detection-test-report
+          path: test_report.json
+          retention-days: 90
+
+  # ============================================================
+  # JOB 3: Convert Sigma -> Elastic/Splunk queries (dry run)
+  # ============================================================
+  convert-rules:
+    name: "🔄 Convert to SIEM Queries"
+    runs-on: ubuntu-latest
+    needs: test-detections
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install sigma-cli
+        run: pip install sigma-cli pySigma-backend-elasticsearch pySigma-backend-splunk
+
+      - name: Convert to Elastic EQL
+        run: |
+          mkdir -p converted/elastic converted/splunk
+
+          for rule in rules/sigma/*.yml; do
+            name=$(basename "$rule" .yml)
+            echo "Converting $name to Elastic EQL..."
+            sigma convert \
+              --target elasticsearch \
+              --pipeline ecs_windows \
+              "$rule" > "converted/elastic/${name}.eql" 2>/dev/null \
+              || echo "  ⚠ Conversion warning for $name (check rule syntax)"
+          done
+
+          echo "✅ Elastic EQL conversion complete"
+
+      - name: Convert to Splunk SPL
+        run: |
+          for rule in rules/sigma/*.yml; do
+            name=$(basename "$rule" .yml)
+            echo "Converting $name to Splunk SPL..."
+            sigma convert \
+              --target splunk \
+              --pipeline windows-sysmon \
+              "$rule" > "converted/splunk/${name}.spl" 2>/dev/null \
+              || echo "  ⚠ Conversion warning for $name"
+          done
+
+          echo "✅ Splunk SPL conversion complete"
+
+      - name: Upload converted rules
+        uses: actions/upload-artifact@v4
+        with:
+          name: converted-siem-rules
+          path: converted/
+          retention-days: 30
+
+  # ============================================================
+  # JOB 4: Generate and publish detection metrics
+  # ============================================================
+  publish-metrics:
+    name: "📊 Publish Detection Metrics"
+    runs-on: ubuntu-latest
+    needs: [test-detections, convert-rules]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download test report
+        uses: actions/download-artifact@v4
+        with:
+          name: detection-test-report
+
+      - name: Generate metrics summary
+        run: |
+          python3 - <<'EOF'
+          import json
+          from datetime import datetime
+
+          with open("test_report.json") as f:
+              report = json.load(f)
+
+          summary = report["summary"]
+          rules = report["rules"]
+
+          print("## 📊 Detection Coverage Report")
+          print(f"**Generated:** {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}")
+          print(f"**Total Rules:** {report['total_rules']}")
+          print(f"**All Tests Passed:** {'✅ Yes' if report['all_passed'] else '❌ No'}")
+          print()
+          print("| Technique | Rule | Level | TPR | FPR | Tests |")
+          print("|-----------|------|-------|-----|-----|-------|")
+
+          for rule in sorted(rules, key=lambda r: r['technique_id']):
+              tpr = f"{rule['tpr']:.0%}"
+              fpr = f"{rule['fpr']:.0%}"
+              print(f"| {rule['technique_id']} | {rule['rule_title']} | {rule['level'].upper()} | {tpr} | {fpr} | {rule['total_tests']} |")
+
+          EOF
+
+      - name: Comment PR with metrics (PRs only)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('test_report.json', 'utf8'));
+            const summary = report.summary;
+
+            const body = `## 🔍 Detection-as-Code Validation Report
+            
+            | Metric | Value |
+            |--------|-------|
+            | Total Rules | ${report.total_rules} |
+            | Tests Passed | ${summary.passed}/${summary.total_tests} |
+            | True Positives | ${summary.true_positives} |
+            | False Positives | ${summary.false_positives} |
+            | Status | ${report.all_passed ? '✅ All Pass' : '❌ Failures Found'} |
+            
+            ${!report.all_passed ? '**⚠️ This PR has failing detection tests and cannot be merged.**' : '**✅ All detection tests pass. Safe to merge.**'}`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+  # ============================================================
+  # JOB 5: Deploy to SIEM (main branch only)
+  # ============================================================
+  deploy-to-siem:
+    name: "🚀 Deploy Rules to SIEM"
+    runs-on: ubuntu-latest
+    needs: publish-metrics
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production   # Requires manual approval gate in GitHub
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download converted rules
+        uses: actions/download-artifact@v4
+        with:
+          name: converted-siem-rules
+          path: converted/
+
+      - name: Deploy Elastic rules (via Kibana API)
+        env:
+          KIBANA_URL: ${{ secrets.KIBANA_URL }}
+          KIBANA_API_KEY: ${{ secrets.KIBANA_API_KEY }}
+        run: |
+          echo "Deploying Elastic detection rules..."
+          # In production: use Kibana Detection Rules API
+          # curl -X POST "$KIBANA_URL/api/detection_engine/rules/_import" \
+          #   -H "Authorization: ApiKey $KIBANA_API_KEY" \
+          #   -H "kbn-xsrf: true" \
+          #   --form "file=@converted/elastic/all_rules.ndjson"
+          echo "✅ Elastic deployment simulated (configure secrets for real deployment)"
+
+      - name: Tag deployment in Git
+        run: |
+          git config user.name "Detection Pipeline Bot"
+          git config user.email "detections@company.com"
+          DEPLOY_TAG="deploy-$(date +%Y%m%d-%H%M%S)"
+          git tag -a "$DEPLOY_TAG" -m "Deployed detection rules to SIEM"
+          git push origin "$DEPLOY_TAG"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

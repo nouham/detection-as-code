@@ -1,0 +1,38 @@
+[
+  {
+    "_comment": "TRUE POSITIVE: procdump.exe targeting lsass",
+    "test_id": "T1003.001-TP-001",
+    "expected_result": "ALERT",
+    "EventID": 4688,
+    "TimeCreated": "2024-03-01T22:05:00.000Z",
+    "Computer": "WORKSTATION-99",
+    "SubjectUserName": "attacker",
+    "Image": "C:\\Tools\\procdump.exe",
+    "CommandLine": "procdump.exe -accepteula -ma lsass.exe lsass.dmp",
+    "ProcessId": "0x2001"
+  },
+  {
+    "_comment": "TRUE POSITIVE: comsvcs.dll MiniDump (living-off-the-land)",
+    "test_id": "T1003.001-TP-002",
+    "expected_result": "ALERT",
+    "EventID": 4688,
+    "TimeCreated": "2024-03-01T22:10:00.000Z",
+    "Computer": "SERVER-DC01",
+    "SubjectUserName": "SYSTEM",
+    "Image": "C:\\Windows\\System32\\rundll32.exe",
+    "CommandLine": "rundll32.exe C:\\windows\\System32\\comsvcs.dll, MiniDump 624 C:\\Windows\\Temp\\lsass.dmp full",
+    "ProcessId": "0x2002"
+  },
+  {
+    "_comment": "TRUE POSITIVE: Sysmon Event 10 - Process Access to LSASS with dump-capable mask",
+    "test_id": "T1003.001-TP-003",
+    "expected_result": "ALERT",
+    "EventID": 10,
+    "TimeCreated": "2024-03-01T22:15:00.000Z",
+    "Computer": "WORKSTATION-55",
+    "SourceImage": "C:\\Users\\jsmith\\Downloads\\mimikatz.exe",
+    "TargetImage": "C:\\Windows\\System32\\lsass.exe",
+    "GrantedAccess": "0x1fffff",
+    "CallTrace": "C:\\Windows\\SYSTEM32\\ntdll.dll+0x9e00a|C:\\Windows\\System32\\KERNELBASE.dll+0x3b1e2|UNKNOWN(0000000000000000)"
+  }
+]

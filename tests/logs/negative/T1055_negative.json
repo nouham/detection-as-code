@@ -1,0 +1,20 @@
+[
+  {
+    "_comment": "TRUE NEGATIVE: CreateRemoteThread from a trusted Windows system binary",
+    "test_id": "T1055-TN-001",
+    "expected_result": "NO_ALERT",
+    "EventID": 8,
+    "SourceImage": "C:\\Windows\\System32\\werfault.exe",
+    "TargetImage": "C:\\Windows\\System32\\svchost.exe",
+    "StartAddress": "0x00007FF800000000"
+  },
+  {
+    "_comment": "TRUE NEGATIVE: Source is from Windows Defender (legitimate security tool)",
+    "test_id": "T1055-TN-002",
+    "expected_result": "NO_ALERT",
+    "EventID": 8,
+    "SourceImage": "C:\\Program Files\\Windows Defender\\MsMpEng.exe",
+    "TargetImage": "C:\\Windows\\System32\\svchost.exe",
+    "StartAddress": "0x00007FF800000000"
+  }
+]

@@ -1,0 +1,401 @@
+{
+  "generated_at": "2026-03-12T12:23:48.826201",
+  "total_rules": 5,
+  "all_passed": true,
+  "summary": {
+    "total_tests": 22,
+    "passed": 22,
+    "failed": 0,
+    "true_positives": 12,
+    "false_negatives": 0,
+    "false_positives": 0
+  },
+  "rules": [
+    {
+      "rule_id": "b3c6d9e2-4f5a-6b7c-8d9e-0f1a2b3c4d5e",
+      "rule_title": "LSASS Memory Dump via Common Tools",
+      "technique_id": "T1003.001",
+      "level": "critical",
+      "status": "production",
+      "total_tests": 3,
+      "passed": 3,
+      "failed": 0,
+      "true_positives": 3,
+      "false_negatives": 0,
+      "true_negatives": 0,
+      "false_positives": 0,
+      "tpr": 1.0,
+      "fpr": 0.0,
+      "test_results": [
+        {
+          "rule_id": "b3c6d9e2-4f5a-6b7c-8d9e-0f1a2b3c4d5e",
+          "rule_title": "LSASS Memory Dump via Common Tools",
+          "technique_id": "T1003.001",
+          "test_id": "T1003.001-TP-001",
+          "expected": "ALERT",
+          "actual": "ALERT",
+          "passed": true,
+          "matched_fields": [
+            "Image|endswith",
+            "CommandLine|contains"
+          ],
+          "failure_reason": ""
+        },
+        {
+          "rule_id": "b3c6d9e2-4f5a-6b7c-8d9e-0f1a2b3c4d5e",
+          "rule_title": "LSASS Memory Dump via Common Tools",
+          "technique_id": "T1003.001",
+          "test_id": "T1003.001-TP-002",
+          "expected": "ALERT",
+          "actual": "ALERT",
+          "passed": true,
+          "matched_fields": [
+            "CommandLine|contains|all",
+            "Image|endswith",
+            "CommandLine|contains"
+          ],
+          "failure_reason": ""
+        },
+        {
+          "rule_id": "b3c6d9e2-4f5a-6b7c-8d9e-0f1a2b3c4d5e",
+          "rule_title": "LSASS Memory Dump via Common Tools",
+          "technique_id": "T1003.001",
+          "test_id": "T1003.001-TP-003",
+          "expected": "ALERT",
+          "actual": "ALERT",
+          "passed": true,
+          "matched_fields": [
+            "TargetImage|endswith",
+            "GrantedAccess|contains"
+          ],
+          "failure_reason": ""
+        }
+      ]
+    },
+    {
+      "rule_id": "c4d7e0f3-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+      "rule_title": "Suspicious Scheduled Task Creation",
+      "technique_id": "T1053.005",
+      "level": "high",
+      "status": "production",
+      "total_tests": 4,
+      "passed": 4,
+      "failed": 0,
+      "true_positives": 2,
+      "false_negatives": 0,
+      "true_negatives": 2,
+      "false_positives": 0,
+      "tpr": 1.0,
+      "fpr": 0.0,
+      "test_results": [
+        {
+          "rule_id": "c4d7e0f3-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+          "rule_title": "Suspicious Scheduled Task Creation",
+          "technique_id": "T1053.005",
+          "test_id": "T1053.005-TP-001",
+          "expected": "ALERT",
+          "actual": "ALERT",
+          "passed": true,
+          "matched_fields": [
+            "Image|endswith",
+            "CommandLine|contains",
+            "CommandLine|contains"
+          ],
+          "failure_reason": ""
+        },
+        {
+          "rule_id": "c4d7e0f3-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+          "rule_title": "Suspicious Scheduled Task Creation",
+          "technique_id": "T1053.005",
+          "test_id": "T1053.005-TP-002",
+          "expected": "ALERT",
+          "actual": "ALERT",
+          "passed": true,
+          "matched_fields": [
+            "Image|endswith",
+            "CommandLine|contains",
+            "CommandLine|contains"
+          ],
+          "failure_reason": ""
+        },
+        {
+          "rule_id": "c4d7e0f3-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+          "rule_title": "Suspicious Scheduled Task Creation",
+          "technique_id": "T1053.005",
+          "test_id": "T1053.005-TN-001",
+          "expected": "NO_ALERT",
+          "actual": "NO_ALERT",
+          "passed": true,
+          "matched_fields": [
+            "Image|endswith",
+            "CommandLine|contains"
+          ],
+          "failure_reason": ""
+        },
+        {
+          "rule_id": "c4d7e0f3-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+          "rule_title": "Suspicious Scheduled Task Creation",
+          "technique_id": "T1053.005",
+          "test_id": "T1053.005-TN-002",
+          "expected": "NO_ALERT",
+          "actual": "NO_ALERT",
+          "passed": true,
+          "matched_fields": [],
+          "failure_reason": ""
+        }
+      ]
+    },
+    {
+      "rule_id": "d5e8f1a4-6b7c-8d9e-0f1a-2b3c4d5e6f7a",
+      "rule_title": "Process Injection via Common API Patterns",
+      "technique_id": "T1055",
+      "level": "high",
+      "status": "production",
+      "total_tests": 4,
+      "passed": 4,
+      "failed": 0,
+      "true_positives": 2,
+      "false_negatives": 0,
+      "true_negatives": 2,
+      "false_positives": 0,
+      "tpr": 1.0,
+      "fpr": 0.0,
+      "test_results": [
+        {
+          "rule_id": "d5e8f1a4-6b7c-8d9e-0f1a-2b3c4d5e6f7a",
+          "rule_title": "Process Injection via Common API Patterns",
+          "technique_id": "T1055",
+          "test_id": "T1055-TP-001",
+          "expected": "ALERT",
+          "actual": "ALERT",
+          "passed": true,
+          "matched_fields": [
+            "TargetImage|endswith"
+          ],
+          "failure_reason": ""
+        },
+        {
+          "rule_id": "d5e8f1a4-6b7c-8d9e-0f1a-2b3c4d5e6f7a",
+          "rule_title": "Process Injection via Common API Patterns",
+          "technique_id": "T1055",
+          "test_id": "T1055-TP-002",
+          "expected": "ALERT",
+          "actual": "ALERT",
+          "passed": true,
+          "matched_fields": [
+            "EventID",
+            "SourceImage|endswith",
+            "TargetImage|endswith"
+          ],
+          "failure_reason": ""
+        },
+        {
+          "rule_id": "d5e8f1a4-6b7c-8d9e-0f1a-2b3c4d5e6f7a",
+          "rule_title": "Process Injection via Common API Patterns",
+          "technique_id": "T1055",
+          "test_id": "T1055-TN-001",
+          "expected": "NO_ALERT",
+          "actual": "NO_ALERT",
+          "passed": true,
+          "matched_fields": [
+            "TargetImage|endswith",
+            "SourceImage|startswith"
+          ],
+          "failure_reason": ""
+        },
+        {
+          "rule_id": "d5e8f1a4-6b7c-8d9e-0f1a-2b3c4d5e6f7a",
+          "rule_title": "Process Injection via Common API Patterns",
+          "technique_id": "T1055",
+          "test_id": "T1055-TN-002",
+          "expected": "NO_ALERT",
+          "actual": "NO_ALERT",
+          "passed": true,
+          "matched_fields": [
+            "TargetImage|endswith",
+            "SourceImage|startswith"
+          ],
+          "failure_reason": ""
+        }
+      ]
+    },
+    {
+      "rule_id": "a2b5c8d1-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
+      "rule_title": "PowerShell Encoded Command Execution",
+      "technique_id": "T1059.001",
+      "level": "high",
+      "status": "production",
+      "total_tests": 7,
+      "passed": 7,
+      "failed": 0,
+      "true_positives": 3,
+      "false_negatives": 0,
+      "true_negatives": 4,
+      "false_positives": 0,
+      "tpr": 1.0,
+      "fpr": 0.0,
+      "test_results": [
+        {
+          "rule_id": "a2b5c8d1-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
+          "rule_title": "PowerShell Encoded Command Execution",
+          "technique_id": "T1059.001",
+          "test_id": "T1059.001-TP-001",
+          "expected": "ALERT",
+          "actual": "ALERT",
+          "passed": true,
+          "matched_fields": [
+            "Image|endswith",
+            "CommandLine|contains"
+          ],
+          "failure_reason": ""
+        },
+        {
+          "rule_id": "a2b5c8d1-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
+          "rule_title": "PowerShell Encoded Command Execution",
+          "technique_id": "T1059.001",
+          "test_id": "T1059.001-TP-002",
+          "expected": "ALERT",
+          "actual": "ALERT",
+          "passed": true,
+          "matched_fields": [
+            "Image|endswith",
+            "CommandLine|contains"
+          ],
+          "failure_reason": ""
+        },
+        {
+          "rule_id": "a2b5c8d1-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
+          "rule_title": "PowerShell Encoded Command Execution",
+          "technique_id": "T1059.001",
+          "test_id": "T1059.001-TP-003",
+          "expected": "ALERT",
+          "actual": "ALERT",
+          "passed": true,
+          "matched_fields": [
+            "Image|endswith",
+            "CommandLine|contains"
+          ],
+          "failure_reason": ""
+        },
+        {
+          "rule_id": "a2b5c8d1-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
+          "rule_title": "PowerShell Encoded Command Execution",
+          "technique_id": "T1059.001",
+          "test_id": "T1059.001-TN-001",
+          "expected": "NO_ALERT",
+          "actual": "NO_ALERT",
+          "passed": true,
+          "matched_fields": [],
+          "failure_reason": ""
+        },
+        {
+          "rule_id": "a2b5c8d1-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
+          "rule_title": "PowerShell Encoded Command Execution",
+          "technique_id": "T1059.001",
+          "test_id": "T1059.001-TN-002",
+          "expected": "NO_ALERT",
+          "actual": "NO_ALERT",
+          "passed": true,
+          "matched_fields": [],
+          "failure_reason": ""
+        },
+        {
+          "rule_id": "a2b5c8d1-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
+          "rule_title": "PowerShell Encoded Command Execution",
+          "technique_id": "T1059.001",
+          "test_id": "T1059.001-TN-003",
+          "expected": "NO_ALERT",
+          "actual": "NO_ALERT",
+          "passed": true,
+          "matched_fields": [],
+          "failure_reason": ""
+        },
+        {
+          "rule_id": "a2b5c8d1-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
+          "rule_title": "PowerShell Encoded Command Execution",
+          "technique_id": "T1059.001",
+          "test_id": "T1059.001-TN-004",
+          "expected": "NO_ALERT",
+          "actual": "NO_ALERT",
+          "passed": true,
+          "matched_fields": [],
+          "failure_reason": ""
+        }
+      ]
+    },
+    {
+      "rule_id": "e6f9a2b5-7c8d-9e0f-1a2b-3c4d5e6f7a8b",
+      "rule_title": "Suspicious Local User Account Creation",
+      "technique_id": "T1136.001",
+      "level": "medium",
+      "status": "production",
+      "total_tests": 4,
+      "passed": 4,
+      "failed": 0,
+      "true_positives": 2,
+      "false_negatives": 0,
+      "true_negatives": 2,
+      "false_positives": 0,
+      "tpr": 1.0,
+      "fpr": 0.0,
+      "test_results": [
+        {
+          "rule_id": "e6f9a2b5-7c8d-9e0f-1a2b-3c4d5e6f7a8b",
+          "rule_title": "Suspicious Local User Account Creation",
+          "technique_id": "T1136.001",
+          "test_id": "T1136.001-TP-001",
+          "expected": "ALERT",
+          "actual": "ALERT",
+          "passed": true,
+          "matched_fields": [
+            "EventID"
+          ],
+          "failure_reason": ""
+        },
+        {
+          "rule_id": "e6f9a2b5-7c8d-9e0f-1a2b-3c4d5e6f7a8b",
+          "rule_title": "Suspicious Local User Account Creation",
+          "technique_id": "T1136.001",
+          "test_id": "T1136.001-TP-002",
+          "expected": "ALERT",
+          "actual": "ALERT",
+          "passed": true,
+          "matched_fields": [
+            "EventID"
+          ],
+          "failure_reason": ""
+        },
+        {
+          "rule_id": "e6f9a2b5-7c8d-9e0f-1a2b-3c4d5e6f7a8b",
+          "rule_title": "Suspicious Local User Account Creation",
+          "technique_id": "T1136.001",
+          "test_id": "T1136.001-TN-001",
+          "expected": "NO_ALERT",
+          "actual": "NO_ALERT",
+          "passed": true,
+          "matched_fields": [
+            "EventID",
+            "SubjectUserName|endswith",
+            "SubjectLogonId"
+          ],
+          "failure_reason": ""
+        },
+        {
+          "rule_id": "e6f9a2b5-7c8d-9e0f-1a2b-3c4d5e6f7a8b",
+          "rule_title": "Suspicious Local User Account Creation",
+          "technique_id": "T1136.001",
+          "test_id": "T1136.001-TN-002",
+          "expected": "NO_ALERT",
+          "actual": "NO_ALERT",
+          "passed": true,
+          "matched_fields": [
+            "EventID",
+            "SubjectUserName|endswith",
+            "SubjectLogonId"
+          ],
+          "failure_reason": ""
+        }
+      ]
+    }
+  ]
+}

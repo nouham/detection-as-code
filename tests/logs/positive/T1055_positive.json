@@ -1,0 +1,20 @@
+[
+  {
+    "_comment": "TRUE POSITIVE: CreateRemoteThread from suspicious non-system binary into svchost.exe",
+    "test_id": "T1055-TP-001",
+    "expected_result": "ALERT",
+    "EventID": 8,
+    "SourceImage": "C:\\Users\\nouha\\Downloads\\injector.exe",
+    "TargetImage": "C:\\Windows\\System32\\svchost.exe",
+    "StartAddress": "0x00007FF800000000"
+  },
+  {
+    "_comment": "TRUE POSITIVE: wscript.exe copy dropped in Temp folder (not in System32) injecting into explorer.exe",
+    "test_id": "T1055-TP-002",
+    "expected_result": "ALERT",
+    "EventID": 8,
+    "SourceImage": "C:\\Users\\nouha\\AppData\\Local\\Temp\\wscript.exe",
+    "TargetImage": "C:\\Windows\\explorer.exe",
+    "StartAddress": "0x00007FF900000000"
+  }
+]

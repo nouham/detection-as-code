@@ -1,0 +1,22 @@
+[
+  {
+    "_comment": "TRUE NEGATIVE: schtasks /create pointing to trusted Program Files path",
+    "test_id": "T1053.005-TN-001",
+    "expected_result": "NO_ALERT",
+    "EventID": 1,
+    "Image": "C:\\Windows\\System32\\schtasks.exe",
+    "CommandLine": "schtasks.exe /create /tn \"GoogleUpdate\" /tr \"C:\\Program Files (x86)\\Google\\Update\\GoogleUpdate.exe /c\" /sc onlogon /f",
+    "ParentImage": "C:\\Windows\\System32\\msiexec.exe",
+    "User": "NT AUTHORITY\\SYSTEM"
+  },
+  {
+    "_comment": "TRUE NEGATIVE: schtasks /query (just querying, not creating)",
+    "test_id": "T1053.005-TN-002",
+    "expected_result": "NO_ALERT",
+    "EventID": 1,
+    "Image": "C:\\Windows\\System32\\schtasks.exe",
+    "CommandLine": "schtasks.exe /query /fo LIST",
+    "ParentImage": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+    "User": "WINDOWS11\\nouha"
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "_comment": "TRUE NEGATIVE: Normal PowerShell without encoding flag",
+    "test_id": "T1059.001-TN-001",
+    "expected_result": "NO_ALERT",
+    "EventID": 4688,
+    "TimeCreated": "2024-03-01T09:00:00.000Z",
+    "Computer": "WORKSTATION-10",
+    "SubjectUserName": "jdoe",
+    "NewProcessName": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+    "ParentProcessName": "C:\\Windows\\explorer.exe",
+    "CommandLine": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\\Scripts\\backup.ps1",
+    "ProcessId": "0x1001"
+  },
+  {
+    "_comment": "TRUE NEGATIVE: PowerShell with -Command flag (not encoded)",
+    "test_id": "T1059.001-TN-002",
+    "expected_result": "NO_ALERT",
+    "EventID": 4688,
+    "TimeCreated": "2024-03-01T10:00:00.000Z",
+    "Computer": "SERVER-02",
+    "SubjectUserName": "SYSTEM",
+    "NewProcessName": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+    "ParentProcessName": "C:\\Windows\\System32\\svchost.exe",
+    "CommandLine": "powershell.exe -Command \"Get-Service | Where-Object {$_.Status -eq 'Running'}\"",
+    "ProcessId": "0x1002"
+  },
+  {
+    "_comment": "TRUE NEGATIVE: cmd.exe (not powershell)",
+    "test_id": "T1059.001-TN-003",
+    "expected_result": "NO_ALERT",
+    "EventID": 4688,
+    "TimeCreated": "2024-03-01T11:00:00.000Z",
+    "Computer": "WORKSTATION-05",
+    "SubjectUserName": "admin",
+    "NewProcessName": "C:\\Windows\\System32\\cmd.exe",
+    "CommandLine": "cmd.exe /c dir C:\\Users",
+    "ProcessId": "0x1003"
+  },
+  {
+    "_comment": "TRUE NEGATIVE: String contains 'enc' but is a file path, not a flag",
+    "test_id": "T1059.001-TN-004",
+    "expected_result": "NO_ALERT",
+    "EventID": 4688,
+    "TimeCreated": "2024-03-01T12:00:00.000Z",
+    "Computer": "WORKSTATION-07",
+    "SubjectUserName": "jsmith",
+    "NewProcessName": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+    "CommandLine": "powershell.exe -File C:\\Tools\\encode_files.ps1 -InputPath C:\\Data",
+    "ProcessId": "0x1004"
+  }
+]
