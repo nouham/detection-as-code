@@ -18,6 +18,8 @@ on:
       - 'tests/**'
       - 'scripts/**'
 
+permissions:
+  contents: write
 # Prevent concurrent pipeline runs on the same branch
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
