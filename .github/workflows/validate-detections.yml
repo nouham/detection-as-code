@@ -18,8 +18,10 @@ on:
       - 'tests/**'
       - 'scripts/**'
 
+
 permissions:
   contents: write
+  
 # Prevent concurrent pipeline runs on the same branch
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -209,8 +211,8 @@ jobs:
             name=$(basename "$rule" .yml)
             echo "Converting $name to Elastic EQL..."
             sigma convert \
-              --target elasticsearch \
-              --pipeline ecs_windows \
+              --target eql \
+              --pipeline ecs-windows \
               "$rule" > "converted/elastic/${name}.eql" 2>/dev/null \
               || echo "  ⚠ Conversion warning for $name (check rule syntax)"
           done
@@ -224,7 +226,7 @@ jobs:
             echo "Converting $name to Splunk SPL..."
             sigma convert \
               --target splunk \
-              --pipeline windows-sysmon \
+              --pipeline splunk_windows \
               "$rule" > "converted/splunk/${name}.spl" 2>/dev/null \
               || echo "  ⚠ Conversion warning for $name"
           done

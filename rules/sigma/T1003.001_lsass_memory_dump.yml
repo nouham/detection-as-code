@@ -1,7 +1,7 @@
 #comment
 title: LSASS Memory Dump via Common Tools
 id: b3c6d9e2-4f5a-6b7c-8d9e-0f1a2b3c4d5e
-status: production
+status: stable
 description: >
   Detects attempts to dump LSASS process memory using common offensive tools
   (Task Manager, ProcDump, comsvcs.dll MiniDump). Credential dumping from LSASS
@@ -15,7 +15,7 @@ modified: 2024-03-10
 tags:
   - attack.credential_access
   - attack.t1003.001
-  - atomic_red_team
+  - atomic.red_team
 logsource:
   category: process_creation
   product: windows

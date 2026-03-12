@@ -1,6 +1,6 @@
 title: Process Injection via Common API Patterns
 id: d5e8f1a4-6b7c-8d9e-0f1a-2b3c4d5e6f7a
-status: production
+status: stable
 description: >
   Detects process injection indicators: CreateRemoteThread calls across process
   boundaries, VirtualAllocEx in a remote process, or unusual parent-child process
@@ -17,7 +17,7 @@ tags:
   - attack.t1055
   - attack.t1055.001
   - attack.t1055.002
-  - atomic_red_team
+  - atomic.red_team
 logsource:
   product: windows
   category: create_remote_thread

@@ -1,6 +1,6 @@
 title: PowerShell Encoded Command Execution
 id: a2b5c8d1-3e4f-5a6b-7c8d-9e0f1a2b3c4d
-status: production
+status: stable
 description: >
   Detects PowerShell execution with encoded command flag (-enc/-encodedcommand).
   Threat actors use base64-encoded payloads to obfuscate malicious scripts and
@@ -15,7 +15,7 @@ tags:
   - attack.execution
   - attack.t1059.001
   - attack.defense_evasion
-  - atomic_red_team
+  - atomic.red_team
 logsource:
   category: process_creation
   product: windows

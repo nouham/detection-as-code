@@ -1,6 +1,6 @@
 title: Suspicious Scheduled Task Creation
 id: c4d7e0f3-5a6b-7c8d-9e0f-1a2b3c4d5e6f
-status: production
+status: stable
 description: >
   Detects creation of scheduled tasks with suspicious characteristics commonly
   used for persistence: tasks running from temp directories, using encoded commands,
@@ -15,7 +15,7 @@ tags:
   - attack.persistence
   - attack.privilege_escalation
   - attack.t1053.005
-  - atomic_red_team
+  - atomic.red_team
 logsource:
   category: process_creation
   product: windows

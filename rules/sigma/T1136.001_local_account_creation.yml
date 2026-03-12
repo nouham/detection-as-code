@@ -1,6 +1,6 @@
 title: Suspicious Local User Account Creation
 id: e6f9a2b5-7c8d-9e0f-1a2b-3c4d5e6f7a8b
-status: production
+status: stable
 description: >
   Detects creation of local user accounts outside of expected administrative
   processes. Threat actors create backdoor accounts for persistence. Pairs with
@@ -14,7 +14,7 @@ modified: 2024-03-05
 tags:
   - attack.persistence
   - attack.t1136.001
-  - atomic_red_team
+  - atomic.red_team
 logsource:
   product: windows
   service: security
