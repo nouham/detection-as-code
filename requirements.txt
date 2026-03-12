@@ -1,0 +1,6 @@
+pyyaml>=6.0
+jsonschema>=4.0
+sigma-cli>=0.9
+pySigma>=0.10
+pySigma-backend-elasticsearch>=1.0
+pySigma-pipeline-ecs-windows>=1.0
