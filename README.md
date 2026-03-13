@@ -147,5 +147,5 @@ sigma convert \
 
 ## Author
 
-**Nouha** — Detection Engineering Lab, March 2026
+**Nouha Mkhinini** — Detection Engineering Lab, March 2026
 Built as a hands-on project covering the full detection lifecycle: adversary simulation → telemetry → detection logic → automated validation → CI/CD deployment.
