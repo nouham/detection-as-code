@@ -47,6 +47,8 @@ detection-as-code/
 │       └── negative/                 # Benign events (must NOT trigger alert)
 ├── scripts/
 │   └── validate_rules.py            # TPR/FPR validation engine
+├── report/
+│   └── Detection_as_a_code_lab_report.pdf
 ├── requirements.txt
 └── README.md
 ```
@@ -105,7 +107,7 @@ Expected output:
 ```
 [INFO] Found 5 rule(s) to validate
 [INFO] TPR=100.0% | FPR=0.0% | Tests=22 | Passed=22 | Failed=0
-🎉 ALL RULES PASSED — Safe to deploy
+ALL RULES PASSED — Safe to deploy
 ```
 
 ### Convert a Rule to Elastic EQL
@@ -140,15 +142,6 @@ sigma convert \
 | sigma-cli | 0.9.x |
 | Python | 3.11 |
 
----
-
-## Adding a New Rule
-
-1. Write a Sigma rule in `rules/sigma/` following the naming convention (`TXXXX_description.yml`)
-2. Add positive test logs to `tests/logs/positive/TXXXX_positive.json`
-3. Add negative test logs to `tests/logs/negative/TXXXX_negative.json`
-4. Run `validate_rules.py` locally to confirm TPR=100% and FPR=0%
-5. Open a pull request — the CI pipeline validates automatically before merge
 
 ---
 
